@@ -1,28 +1,19 @@
 import type { Skill } from '../types';
+import SourceDonut from './ProficiencyDonut';
 import CategoryBarChart from './CategoryBarChart';
-import ProficiencyDonut from './ProficiencyDonut';
-import SkillRadarChart from './SkillRadarChart';
+import TagRadarChart from './SkillRadarChart';
 
-interface ChartsSectionProps {
-  skills: Skill[];
-}
-
-export default function ChartsSection({ skills }: ChartsSectionProps) {
+/** Analytics — all charts reflect the currently filtered skill set. */
+export default function ChartsSection({ skills }: { skills: Skill[] }) {
   return (
-    <section id="charts" className="scroll-mt-20">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-        Analytics
-      </h2>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-1">
-          <ProficiencyDonut skills={skills} />
-        </div>
-        <div className="lg:col-span-2">
-          <CategoryBarChart skills={skills} />
-        </div>
-        <div className="lg:col-span-3">
-          <SkillRadarChart skills={skills} />
-        </div>
+    <section className="space-y-4">
+      <p className="text-sm text-gray-500 dark:text-gray-400">
+        以下圖表反映目前篩選的 {skills.length} 個 skill。
+      </p>
+      <div className="grid lg:grid-cols-3 gap-4">
+        <SourceDonut skills={skills} />
+        <CategoryBarChart skills={skills} />
+        <TagRadarChart skills={skills} />
       </div>
     </section>
   );

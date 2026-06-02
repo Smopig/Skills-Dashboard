@@ -1,0 +1,28 @@
+[
+  {
+    "id": "knowledge-work",
+    "title": "知識工作 / 文件產出",
+    "description": "研究、整理、產出文件與簡報",
+    "skillNames": ["deep-research", "docx", "pptx", "pdf", "xlsx"],
+    "workflowId": "research-to-report"
+  },
+  {
+    "id": "dev",
+    "title": "開發收尾",
+    "description": "程式碼審查、簡化到測試與安全檢查",
+    "skillNames": ["code-review", "simplify", "verify", "security-review"],
+    "workflowId": "pr-wrap-up"
+  },
+  {
+    "id": "design",
+    "title": "設計與視覺產出",
+    "description": "做設計稿、前端介面與視覺素材",
+    "skillNames": ["canvas-design", "frontend-design", "algorithmic-art", "theme-factory"]
+  },
+  {
+    "id": "meta",
+    "title": "打造新 Skill",
+    "description": "建立、設定屬於你自己的 skill",
+    "skillNames": ["skill-creator", "mcp-builder", "startup-hook-skill"]
+  }
+]

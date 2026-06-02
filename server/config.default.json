@@ -1,0 +1,31 @@
+{
+  "port": 5174,
+  "maxDepth": 4,
+  "cacheTtl": 30000,
+  "roots": [
+    { "path": "~/.claude/skills", "source": "user" },
+    { "path": "~/.claude/plugins/*/skills", "source": "plugin" },
+    { "path": "<project>/.claude/skills", "source": "project" },
+    { "path": "/mnt/skills/public", "source": "builtin" },
+    { "path": "/mnt/skills/examples", "source": "builtin" }
+  ],
+  "categoryRules": [
+    { "category": "research", "keywords": ["research", "search", "investigate", "deep-research", "sources"] },
+    { "category": "docs", "keywords": ["docx", "pdf", "word document", "report", "memo", "letter", "document", "spreadsheet", "xlsx", "pptx", "presentation", "co-author"] },
+    { "category": "design", "keywords": ["design", "canvas", "brand", "theme", "art", "frontend-design", "visual", "gif", "slack-gif"] },
+    { "category": "dev", "keywords": ["code", "review", "verify", "lint", "simplify", "security", "pull request", "pr ", "ci", "commit", "git", "test"] },
+    { "category": "automation", "keywords": ["loop", "hook", "workflow", "automate", "schedule", "session-start", "mcp", "config", "permission", "keybinding"] },
+    { "category": "data", "keywords": ["data", "financial", "calculator", "expense", "form", "reimbursement"] },
+    { "category": "meta", "keywords": ["skill-creator", "create skill", "mcp-builder", "learn"] }
+  ],
+  "tagRules": [
+    { "tag": "web", "keywords": ["web", "browser", "http", "url", "artifact"] },
+    { "tag": "pdf", "keywords": ["pdf"] },
+    { "tag": "office", "keywords": ["docx", "xlsx", "pptx", "word", "excel", "powerpoint"] },
+    { "tag": "review", "keywords": ["review", "code-review", "audit"] },
+    { "tag": "ci", "keywords": ["ci", "pipeline", "github actions", "workflow run"] },
+    { "tag": "content", "keywords": ["content", "writing", "report", "document", "memo"] },
+    { "tag": "design", "keywords": ["design", "visual", "canvas", "brand", "theme"] },
+    { "tag": "research", "keywords": ["research", "sources", "verify", "citation"] }
+  ]
+}

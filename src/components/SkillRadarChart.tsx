@@ -1,73 +1,34 @@
-import {
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  ResponsiveContainer,
-  Tooltip,
-} from 'recharts';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import type { Skill } from '../types';
-import { CATEGORIES } from '../data/skills';
+import { ChartCard } from './ProficiencyDonut';
 
-interface SkillRadarChartProps {
-  skills: Skill[];
-}
+/** Tag coverage — how many skills carry each of the top tags. */
+export default function TagRadarChart({ skills }: { skills: Skill[] }) {
+  const counts: Record<string, number> = {};
+  for (const s of skills) for (const t of s.tags) counts[t] = (counts[t] || 0) + 1;
+  const data = Object.entries(counts)
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
 
-export default function SkillRadarChart({ skills }: SkillRadarChartProps) {
-  const data = CATEGORIES.map((cat) => {
-    const catSkills = skills.filter((s) => s.category === cat.id);
-    const avg = catSkills.length
-      ? catSkills.reduce((sum, s) => sum + s.level, 0) / catSkills.length
-      : 0;
-    return {
-      category: cat.name,
-      level: parseFloat(avg.toFixed(2)),
-      fullMark: 5,
-    };
-  });
+  if (data.length < 3) {
+    return (
+      <ChartCard title="標籤覆蓋">
+        <p className="text-sm text-gray-400 h-[260px] flex items-center justify-center">標籤資料不足以繪製雷達圖。</p>
+      </ChartCard>
+    );
+  }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-        Skill Radar
-      </h3>
-      <p className="text-sm text-gray-400 dark:text-gray-500 mb-5">
-        Average proficiency across all domains
-      </p>
-
-      <ResponsiveContainer width="100%" height={280}>
-        <RadarChart data={data} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
-          <PolarGrid stroke="#e5e7eb" className="dark:stroke-gray-700" />
-          <PolarAngleAxis
-            dataKey="category"
-            tick={{ fontSize: 11, fill: '#9ca3af' }}
-          />
-          <PolarRadiusAxis
-            angle={90}
-            domain={[0, 5]}
-            tick={{ fontSize: 10, fill: '#9ca3af' }}
-            tickCount={6}
-          />
-          <Radar
-            name="Avg Level"
-            dataKey="level"
-            stroke="#7c3aed"
-            fill="#7c3aed"
-            fillOpacity={0.25}
-            strokeWidth={2}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#fff',
-              border: '1px solid #e5e7eb',
-              borderRadius: '12px',
-              fontSize: '13px',
-            }}
-            formatter={(value) => [`${value}/5`, 'Avg Level']}
-          />
+    <ChartCard title="標籤覆蓋">
+      <ResponsiveContainer width="100%" height={260}>
+        <RadarChart data={data}>
+          <PolarGrid stroke="#88888833" />
+          <PolarAngleAxis dataKey="tag" tick={{ fontSize: 11 }} />
+          <Tooltip />
+          <Radar dataKey="count" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.4} />
         </RadarChart>
       </ResponsiveContainer>
-    </div>
+    </ChartCard>
   );
 }
