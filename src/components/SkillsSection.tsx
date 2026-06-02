@@ -1,218 +1,129 @@
-import { useRef } from 'react';
-import { Search, X, SlidersHorizontal, LayoutGrid, List } from 'lucide-react';
 import { useState } from 'react';
-import clsx from 'clsx';
-import type { Skill, SortOption } from '../types';
-import { CATEGORIES } from '../data/skills';
+import { Search, X, LayoutGrid, List } from 'lucide-react';
+import type { Skill, Facet, SortOption, SkillSource } from '../types';
+import { CATEGORY_LABELS, SOURCE_LABELS } from '../types';
 import SkillCard from './SkillCard';
-import SkillRow from './SkillRow';
+import TagCloudFilter from './TagCloudFilter';
 
 interface SkillsSectionProps {
-  skills: Skill[];
   filtered: Skill[];
+  total: number;
+  facets: { categories: Facet[]; tags: Facet[]; sources: Facet[] };
   search: string;
   onSearch: (v: string) => void;
   activeCategory: string;
   onCategory: (v: string) => void;
+  activeTags: string[];
+  onToggleTag: (t: string) => void;
+  onClearTags: () => void;
+  activeSource: string;
+  onSource: (v: string) => void;
   sortOption: SortOption;
   onSort: (v: SortOption) => void;
+  onOpen: (skill: Skill) => void;
 }
 
-/** Count skills per category for badges */
-function useCategoryCounts(skills: Skill[]) {
-  const map: Record<string, number> = { all: skills.length };
-  for (const s of skills) {
-    map[s.category] = (map[s.category] ?? 0) + 1;
-  }
-  return map;
-}
-
-export default function SkillsSection({
-  skills,
-  filtered,
-  search,
-  onSearch,
-  activeCategory,
-  onCategory,
-  sortOption,
-  onSort,
-}: SkillsSectionProps) {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const searchRef = useRef<HTMLInputElement>(null);
-  const counts = useCategoryCounts(skills);
-
-  const allCategories = [
-    { id: 'all', name: 'All', color: '', bgColor: '', textColor: '' },
-    ...CATEGORIES,
-  ];
-
-  const handleClearSearch = () => {
-    onSearch('');
-    searchRef.current?.focus();
-  };
+export default function SkillsSection(props: SkillsSectionProps) {
+  const [view, setView] = useState<'grid' | 'list'>('grid');
+  const { filtered, total, facets } = props;
 
   return (
-    <section id="skills" className="scroll-mt-20">
-
-      {/* ── Section heading ── */}
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-baseline gap-2">
-          Skills
-          <span className="text-sm font-normal text-gray-400 dark:text-gray-500">
-            {filtered.length === skills.length
-              ? `${skills.length} 個技能`
-              : `${filtered.length} / ${skills.length} 個技能`}
-          </span>
-        </h2>
-
-        {/* View toggle */}
-        <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
-          <button
-            onClick={() => setViewMode('grid')}
-            aria-label="Grid view"
-            className={clsx(
-              'p-1.5 rounded-lg transition-all',
-              viewMode === 'grid'
-                ? 'bg-white dark:bg-gray-700 text-violet-600 dark:text-violet-400 shadow-sm'
-                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-            )}
-          >
-            <LayoutGrid className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            aria-label="List view"
-            className={clsx(
-              'p-1.5 rounded-lg transition-all',
-              viewMode === 'list'
-                ? 'bg-white dark:bg-gray-700 text-violet-600 dark:text-violet-400 shadow-sm'
-                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-            )}
-          >
-            <List className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* ── Search + Sort controls ── */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-5">
-
-        {/* Search box */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+    <section className="space-y-5">
+      {/* Search + source + sort + view */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
-            ref={searchRef}
-            type="text"
-            value={search}
-            onChange={(e) => onSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Escape' && handleClearSearch()}
-            placeholder="搜尋技能名稱..."
-            className={clsx(
-              'w-full pl-9 pr-9 py-2.5 rounded-xl border bg-white dark:bg-gray-800',
-              'text-gray-900 dark:text-white placeholder-gray-400 text-sm',
-              'focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all',
-              search
-                ? 'border-violet-400 dark:border-violet-500'
-                : 'border-gray-200 dark:border-gray-700'
-            )}
+            value={props.search}
+            onChange={(e) => props.onSearch(e.target.value)}
+            onKeyDown={(e) => e.key === 'Escape' && props.onSearch('')}
+            placeholder="搜尋 skill 名稱、說明、標籤…"
+            className="w-full pl-9 pr-9 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
           />
-          {/* Clear button */}
-          {search && (
-            <button
-              onClick={handleClearSearch}
-              aria-label="清除搜尋"
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              <X className="w-3.5 h-3.5" />
+          {props.search && (
+            <button onClick={() => props.onSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        {/* Sort dropdown */}
-        <div className="relative shrink-0">
-          <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-          <select
-            value={sortOption}
-            onChange={(e) => onSort(e.target.value as SortOption)}
-            className={clsx(
-              'pl-9 pr-8 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700',
-              'bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm',
-              'focus:outline-none focus:ring-2 focus:ring-violet-500',
-              'appearance-none cursor-pointer'
-            )}
-          >
-            <option value="level-desc">熟練度 高→低</option>
-            <option value="level-asc">熟練度 低→高</option>
-            <option value="name-asc">名稱 A → Z</option>
-            <option value="name-desc">名稱 Z → A</option>
-          </select>
-          {/* dropdown arrow */}
-          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </span>
-        </div>
-      </div>
-
-      {/* ── Category filter tabs ── */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {allCategories.map((cat) => {
-          const count = counts[cat.id] ?? 0;
-          const isActive = activeCategory === cat.id;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => onCategory(cat.id)}
-              className={clsx(
-                'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-150',
-                isActive
-                  ? 'bg-violet-600 text-white shadow-md shadow-violet-200 dark:shadow-violet-900/40 scale-105'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-violet-400 hover:text-violet-600 dark:hover:text-violet-400'
-              )}
-            >
-              {cat.name}
-              <span className={clsx(
-                'inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold transition-colors',
-                isActive
-                  ? 'bg-white/25 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-              )}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Results ── */}
-      {filtered.length === 0 ? (
-        <div className="text-center py-20 text-gray-400 dark:text-gray-500">
-          <p className="text-5xl mb-4">🔍</p>
-          <p className="font-semibold text-gray-600 dark:text-gray-300">找不到符合的技能</p>
-          <p className="text-sm mt-1.5">試試調整搜尋關鍵字或切換分類</p>
-          {search && (
-            <button
-              onClick={handleClearSearch}
-              className="mt-4 text-sm text-violet-600 dark:text-violet-400 hover:underline"
-            >
-              清除搜尋「{search}」
-            </button>
-          )}
-        </div>
-      ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((skill) => (
-            <SkillCard key={skill.id} skill={skill} />
+        <select
+          value={props.activeSource}
+          onChange={(e) => props.onSource(e.target.value)}
+          className="py-2 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200"
+        >
+          <option value="all">所有來源</option>
+          {facets.sources.map((s) => (
+            <option key={s.id} value={s.id}>{SOURCE_LABELS[s.id as SkillSource] || s.id} ({s.count})</option>
           ))}
+        </select>
+
+        <select
+          value={props.sortOption}
+          onChange={(e) => props.onSort(e.target.value as SortOption)}
+          className="py-2 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200"
+        >
+          <option value="name-asc">名稱 A→Z</option>
+          <option value="name-desc">名稱 Z→A</option>
+        </select>
+
+        <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          {(['grid', 'list'] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`p-2 ${view === v ? 'bg-violet-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-500'}`}
+              aria-label={v}
+            >
+              {v === 'grid' ? <LayoutGrid className="w-4 h-4" /> : <List className="w-4 h-4" />}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Category tabs */}
+      <div className="flex flex-wrap gap-2">
+        <CategoryTab id="all" label="全部" count={total} active={props.activeCategory === 'all'} onClick={props.onCategory} />
+        {facets.categories.map((c) => (
+          <CategoryTab
+            key={c.id}
+            id={c.id}
+            label={CATEGORY_LABELS[c.id] || c.id}
+            count={c.count}
+            active={props.activeCategory === c.id}
+            onClick={props.onCategory}
+          />
+        ))}
+      </div>
+
+      {/* Tag cloud */}
+      <TagCloudFilter tags={facets.tags} activeTags={props.activeTags} onToggle={props.onToggleTag} onClear={props.onClearTags} />
+
+      {/* Results */}
+      {filtered.length === 0 ? (
+        <p className="py-16 text-center text-gray-500 dark:text-gray-400">沒有符合條件的 skill。</p>
+      ) : view === 'grid' ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((s) => <SkillCard key={s.id} skill={s} variant="grid" onOpen={props.onOpen} />)}
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
-          {filtered.map((skill) => (
-            <SkillRow key={skill.id} skill={skill} />
-          ))}
+        <div className="space-y-2">
+          {filtered.map((s) => <SkillCard key={s.id} skill={s} variant="list" onOpen={props.onOpen} />)}
         </div>
       )}
     </section>
+  );
+}
+
+function CategoryTab({ id, label, count, active, onClick }: { id: string; label: string; count: number; active: boolean; onClick: (id: string) => void }) {
+  return (
+    <button
+      onClick={() => onClick(id)}
+      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+        active ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-violet-400'
+      }`}
+    >
+      {label} <span className="opacity-60">{count}</span>
+    </button>
   );
 }

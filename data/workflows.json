@@ -1,0 +1,33 @@
+[
+  {
+    "id": "research-to-report",
+    "name": "研究並產出報告",
+    "goal": "把一個主題變成有引用的 Word 報告",
+    "scenario": "knowledge-work",
+    "steps": [
+      { "skillName": "deep-research", "note": "蒐集並查證資料" },
+      { "skillName": "docx", "note": "寫成 Word 報告" }
+    ]
+  },
+  {
+    "id": "pr-wrap-up",
+    "name": "PR 收尾",
+    "goal": "程式碼審查到測試一條龍",
+    "scenario": "dev",
+    "steps": [
+      { "skillName": "code-review", "note": "找出問題" },
+      { "skillName": "simplify", "note": "清理可簡化處" },
+      { "skillName": "verify", "note": "實際跑起來驗證" }
+    ]
+  },
+  {
+    "id": "research-to-deck",
+    "name": "研究並做成簡報",
+    "goal": "把研究結果變成 PowerPoint",
+    "scenario": "knowledge-work",
+    "steps": [
+      { "skillName": "deep-research", "note": "蒐集資料" },
+      { "skillName": "pptx", "note": "產出簡報" }
+    ]
+  }
+]

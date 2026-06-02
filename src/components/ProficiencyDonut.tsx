@@ -1,71 +1,38 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import type { Skill, ProficiencyLevel } from '../types';
-import { PROFICIENCY_LABELS } from '../types';
+import type { Skill } from '../types';
+import { SOURCE_LABELS } from '../types';
 
-interface ProficiencyDonutProps {
-  skills: Skill[];
-}
+const COLORS = ['#8b5cf6', '#10b981', '#f59e0b', '#0ea5e9', '#ef4444', '#6366f1'];
 
-const COLORS: Record<number, string> = {
-  1: '#f87171',
-  2: '#fb923c',
-  3: '#facc15',
-  4: '#3b82f6',
-  5: '#10b981',
-};
-
-export default function ProficiencyDonut({ skills }: ProficiencyDonutProps) {
-  const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-  skills.forEach((s) => { counts[s.level]++; });
-
-  const data = ([1, 2, 3, 4, 5] as ProficiencyLevel[])
-    .filter((lvl) => counts[lvl] > 0)
-    .map((lvl) => ({
-      name: PROFICIENCY_LABELS[lvl],
-      value: counts[lvl],
-      color: COLORS[lvl],
-    }));
+/** Distribution of skills by source. */
+export default function SourceDonut({ skills }: { skills: Skill[] }) {
+  const counts: Record<string, number> = {};
+  for (const s of skills) counts[s.source] = (counts[s.source] || 0) + 1;
+  const data = Object.entries(counts).map(([id, value]) => ({
+    name: SOURCE_LABELS[id as keyof typeof SOURCE_LABELS] || id,
+    value,
+  }));
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-        Proficiency Distribution
-      </h3>
-      <p className="text-sm text-gray-400 dark:text-gray-500 mb-5">
-        Skills by level breakdown
-      </p>
-
-      <ResponsiveContainer width="100%" height={280}>
+    <ChartCard title="來源分佈">
+      <ResponsiveContainer width="100%" height={260}>
         <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="45%"
-            innerRadius={70}
-            outerRadius={110}
-            paddingAngle={3}
-            dataKey="value"
-          >
-            {data.map((entry, index) => (
-              <Cell key={index} fill={entry.color} />
-            ))}
+          <Pie data={data} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
+            {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
           </Pie>
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#fff',
-              border: '1px solid #e5e7eb',
-              borderRadius: '12px',
-              fontSize: '13px',
-            }}
-            formatter={(value) => [`${value} skills`, '']}
-          />
-          <Legend
-            iconType="circle"
-            iconSize={8}
-            wrapperStyle={{ fontSize: '12px', paddingTop: '12px' }}
-          />
+          <Tooltip />
+          <Legend />
         </PieChart>
       </ResponsiveContainer>
+    </ChartCard>
+  );
+}
+
+export function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+      <h3 className="font-semibold text-gray-900 dark:text-white mb-4">{title}</h3>
+      {children}
     </div>
   );
 }
